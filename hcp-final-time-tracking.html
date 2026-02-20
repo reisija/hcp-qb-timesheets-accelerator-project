@@ -1173,9 +1173,15 @@
             }
         }
 
-        function showBulkMenu() {
+        function toggleBulkMenu() {
+            const dropdown = document.getElementById('bulk-dropdown');
+            dropdown.classList.toggle('active');
+        }
+
+        function pushBulkTimesheets() {
             const count = document.querySelectorAll('.checkbox.checked').length;
             alert('Push ' + count + ' timesheets to QuickBooks');
+            document.getElementById('bulk-dropdown').classList.remove('active');
         }
 
         function switchTab(tab) {
