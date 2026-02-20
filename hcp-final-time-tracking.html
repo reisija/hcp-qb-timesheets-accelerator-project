@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Tracking with QB Sync | HCP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: #fafafa;
+            color: #212121;
+        }
+
+        .page-container {
+            padding: 32px 48px;
+            max-width: 1600px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #212121;
+            margin-bottom: 24px;
+        }
+
+        .banner {
+            background: #fff9e6;
+            border-left: 4px solid #ffc107;
+            padding: 12px 16px;
+            margin-bottom: 24px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .banner-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .banner-icon {
+            color: #f57c00;
+            font-size: 18px;
+        }
+
+        .banner-text {
+            font-size: 14px;
+            color: #212121;
+        }
+
+        .banner-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .banner-link {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0e6fbe;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .banner-close {
+            color: #616161;
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            border: none;
+            background: white;
+            color: #616161;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 4px 4px 0 0;
+            border: 1px solid transparent;
+        }
+
+        .tab.active {
+            background: #0e6fbe;
+            color: white;
+        }
+
+        .period-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .period-label {
+            font-size: 14px;
+            color: #616161;
+        }
+
+        .period-input {
+            height: 36px;
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #212121;
+            background: white;
+        }
+
+        .summary-bar {
+            display: flex;
+            gap: 32px;
+            margin-bottom: 24px;
+            padding: 16px 24px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-label {
+            font-size: 12px;
+            color: #616161;
+            margin-bottom: 4px;
+        }
+
+        .summary-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #212121;
+        }
+
+        .employee-tabs {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .employee-tab {
+            padding: 12px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #616161;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .employee-tab.active {
+            color: #212121;
+            border-bottom-color: #0e6fbe;
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .action-left {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-right {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .select-team-button {
+            padding: 10px 24px;
+            background: white;
+            color: #0e6fbe;
+            border: 1px solid #0e6fbe;
+            border-radius: 200px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .bulk-action-container {
+            position: relative;
+            display: none;
+        }
+
+        .bulk-action-container.visible {
+            display: block;
+        }
+
+        .bulk-action-button {
+            padding: 10px 24px;
+            background: white;
+            color: #0e6fbe;
+            border: 1px solid #0e6fbe;
+            border-radius: 200px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bulk-dropdown {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 4px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            min-width: 220px;
+            display: none;
+            z-index: 100;
+        }
+
+        .bulk-dropdown.active {
+            display: block;
+        }
+
+        .bulk-dropdown-item {
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #212121;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .bulk-dropdown-item:hover {
+            background: #f5f5f5;
+        }
+
+        .bulk-dropdown-item:first-child {
+            border-radius: 8px 8px 0 0;
+        }
+
+        .bulk-dropdown-item:last-child {
+            border-radius: 0 0 8px 8px;
+        }
+
+        .submit-button {
+            padding: 10px 24px;
+            background: #0e6fbe;
+            color: white;
+            border: none;
+            border-radius: 200px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .submit-button:hover {
+            background: #0d47a1;
+        }
+
+        .employees-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 16px;
+        }
+
+        .employee-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            position: relative;
+        }
+
+        .employee-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .employee-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #616161;
+        }
+
+        .employee-info {
+            flex: 1;
+        }
+
+        .employee-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #212121;
+            margin-bottom: 2px;
+        }
+
+        .employee-role {
+            font-size: 12px;
+            color: #616161;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #d81b60;
+        }
+
+        .status-text {
+            font-size: 12px;
+            color: #616161;
+        }
+
+        .hours-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .hours-item {
+            text-align: center;
+        }
+
+        .hours-label {
+            font-size: 11px;
+            color: #616161;
+            margin-bottom: 4px;
+        }
+
+        .hours-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #212121;
+        }
+
+        .qb-sync-status {
+            padding: 10px 12px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .qb-sync-status.success {
+            background: #d4f4dd;
+            color: #212121;
+        }
+
+        .qb-sync-status.error {
+            background: #fce4ec;
+            color: #212121;
+        }
+
+        .status-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-icon.success {
+            background: #00a344;
+            color: white;
+        }
+
+        .status-icon.error {
+            background: #e91e63;
+            color: white;
+        }
+
+        .qb-link {
+            color: #0e6fbe;
+            text-decoration: underline;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .review-button {
+            padding: 8px 20px;
+            background: white;
+            color: #0e6fbe;
+            border: 1px solid #0e6fbe;
+            border-radius: 200px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .menu-container {
+            position: relative;
+        }
+
+        .menu-trigger {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 18px;
+            color: #616161;
+            border-radius: 4px;
+        }
+
+        .menu-trigger:hover {
+            background: #f5f5f5;
+        }
+
+        .menu-dropdown {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 4px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            min-width: 220px;
+            display: none;
+            z-index: 100;
+        }
+
+        .menu-dropdown.active {
+            display: block;
+        }
+
+        .menu-item {
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #212121;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-item:hover {
+            background: #f5f5f5;
+        }
+
+        .menu-item:first-child {
+            border-radius: 8px 8px 0 0;
+        }
+
+        .menu-item:last-child {
+            border-radius: 0 0 8px 8px;
+        }
+
+        .menu-icon {
+            width: 20px;
+            text-align: center;
+        }
+
+        .cloud-upload-icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            background: currentColor;
+            -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="m12 12 0 9"/><path d="m16 16-4-4-4 4"/></svg>') no-repeat center;
+            mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="m12 12 0 9"/><path d="m16 16-4-4-4 4"/></svg>') no-repeat center;
+        }
+
+        .checkbox {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .checkbox.checked {
+            background: #0e6fbe;
+            border-color: #0e6fbe;
+        }
+
+        .checkbox.checked::after {
+            content: "✓";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        /* Sync History Tab */
+        .sync-history-container {
+            display: none;
+        }
+
+        .sync-history-container.active {
+            display: block;
+        }
+
+        .history-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .history-range-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .history-range-label {
+            font-size: 14px;
+            color: #616161;
+        }
+
+        .history-range-select {
+            height: 36px;
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #212121;
+            background: white;
+        }
+
+        .table-container {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #fafafa;
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #616161;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        td {
+            padding: 14px 16px;
+            font-size: 14px;
+            color: #212121;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #fafafa;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.synced {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-badge.failed {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .table-link {
+            color: #0e6fbe;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .table-link:hover {
+            text-decoration: underline;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 24px;
+        }
+
+        .page-button {
+            padding: 8px 12px;
+            background: white;
+            color: #212121;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            min-width: 36px;
+        }
+
+        .page-button:hover:not(:disabled) {
+            background: #f5f5f5;
+        }
+
+        .page-button.active {
+            background: #0e6fbe;
+            color: white;
+            border-color: #0e6fbe;
+        }
+
+        .page-button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .table-menu {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <h1 class="page-title">Time tracking</h1>
+
+        <div class="banner">
+            <div class="banner-content">
+                <span class="banner-icon">⚠️</span>
+                <span class="banner-text">Not all employees or contractors have been onboarded.</span>
+            </div>
+            <div class="banner-actions">
+                <span class="banner-link">View & send</span>
+                <span class="banner-close">✕</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="tabs">
+                <button class="tab active">Pay period</button>
+                <button class="tab">Off cycle</button>
+            </div>
+            <div class="period-selector">
+                <span class="period-label">Pay period</span>
+                <input type="text" class="period-input" value="02/14/2026 - 02/20/2026" readonly>
+            </div>
+        </div>
+
+        <div class="summary-bar">
+            <div class="summary-item">
+                <div class="summary-label">Total hours</div>
+                <div class="summary-value">--</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Regular hours</div>
+                <div class="summary-value">--</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Overtime</div>
+                <div class="summary-value">--</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Double time</div>
+                <div class="summary-value">--</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Time off</div>
+                <div class="summary-value">--</div>
+            </div>
+        </div>
+
+        <div class="employee-tabs">
+            <div class="employee-tab active" onclick="switchTab('employees')">Employees (5)</div>
+            <div class="employee-tab" onclick="switchTab('contractors')">Contractors (1)</div>
+            <div class="employee-tab" onclick="switchTab('sync-history')">Sync History</div>
+        </div>
+
+        <!-- Employees View -->
+        <div id="employees-view" class="employees-view active">
+            <div class="action-bar">
+                <div class="action-left">
+                    <button class="select-team-button">Select team</button>
+                </div>
+                <div class="action-right">
+                    <div class="bulk-action-container" id="bulk-action-container">
+                        <button class="bulk-action-button" onclick="toggleBulkMenu()">
+                            <span>Bulk actions</span>
+                            <span>▼</span>
+                        </button>
+                        <div class="bulk-dropdown" id="bulk-dropdown">
+                            <div class="bulk-dropdown-item" onclick="pushBulkTimesheets()">
+                                <span class="cloud-upload-icon"></span>
+                                <span>Push timesheets to QuickBooks</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="submit-button">Submit employee time</button>
+                </div>
+            </div>
+
+            <div class="employees-grid">
+                <!-- Employee 1: Successfully synced -->
+                <div class="employee-card">
+                    <div class="employee-header">
+                        <div class="employee-avatar">👤</div>
+                        <div class="employee-info">
+                            <div class="employee-name">Elizabeth Smith</div>
+                            <div class="employee-role">Employee</div>
+                        </div>
+                        <div class="checkbox" onclick="toggleCheckbox(this)"></div>
+                    </div>
+
+                    <div class="qb-sync-status success">
+                        <span class="status-icon success">✓</span>
+                        <span>Synced to QuickBooks - <span class="qb-link">View timesheet</span></span>
+                    </div>
+
+                    <div class="hours-grid">
+                        <div class="hours-item">
+                            <div class="hours-label">Total</div>
+                            <div class="hours-value">40</div>
+                        </div>
+                        <div class="hours-item">
+                            <div class="hours-label">Reg.</div>
+                            <div class="hours-value">40</div>
+                        </div>
+                        <div class="hours-item">
+                            <div class="hours-label">OT</div>
+                            <div class="hours-value">--</div>
+                        </div>
+                        <div class="hours-item">
+                            <div class="hours-label">DT</div>
+                            <div class="hours-value">--</div>
+                        </div>
+                        <div class="hours-item">
+                            <div class="hours-label">Time off</div>
+                            <div class="hours-value">--</div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <button class="review-button">Review</button>
+                        <div class="menu-container">
+                            <button class="menu-trigger" onclick="toggleMenu(this)">⋮</button>
+                            <div class="menu-dropdown">
+                                <div class="menu-item">
+                                    <span class="cloud-upload-icon"></span>
+                                    <span>Push timesheet to QuickBooks</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Employee 2: Sync error -->
+                <div class="employee-card">
+                    <div class="employee-header">
+                        <div class="employee-avatar">👤</div>
+                        <div class="employee-info">
+                            <div class="employee-name">Emma Smith</div>
+                            <div class="employee-role">Employee</div>
+                        </div>
+                        <div class="checkbox" onclick="toggleCheckbox(this)"></div>
+                    </div>
+
+                    <div class="qb-sync-status error">
+                        ✕ Sync failed: Employee not found in QuickBooks
+                    </div>
+
+                    <div class="hours-grid">
+                        <div class="hours-item">
+                            <div class="hours-label">Total</div>
+                            <div class="hours-value">38</div>
+                        </div>
+                        <div class="hours-item">
+                            <div class="hours-label">Reg.</div>
+                            <div class="hours-value">38</div>
+                        </div>
+                        <div class="hours-item">
+                            <div class="hours-label">OT</div>
+                            <div class="hours-value">--</div>
+                        </div>
+                        <div class="hours-item">
+                            <div class="hours-label">DT</div>
+                            <div class="hours-value">--</div>
+                        </div>
+                        <div class="hours-item">
+                            <div class="hours-label">Time off</div>
+                            <div class="hours-value">--</div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <button class="review-button">Review</button>
+                        <div class="menu-container">
+                            <button class="menu-trigger" onclick="toggleMenu(this)">⋮</button>
+                            <div class="menu-dropdown">
+                                <div class="menu-item">
+                                    <span class="menu-icon">🔄</span>
+                                    <span>Retry sync</span>
+                                </div>
+                                <div class="menu-item">
+                                    <span class="menu-icon">⚡</span>
+                                    <span>Push timesheet to QuickBooks</span>
+                                </div>
+                                <div class="menu-item">
+                                    <span class="menu-icon">⚙️</span>
+                                    <span>Fix sync issue</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Employee 3: No sync status -->
+                <div class="employee-card">
+                    <div class="employee-header">
+                        <div class="employee-avatar">👤</div>
+                        <div class="employee-info">
+                            <div class="employee-name">Jackie Smith</div>
+                            <div class="employee-role">Employee</div>
+                        </div>
+                        <div class="status-indicator">
+                            <div class="status-dot"></div>
+                            <span class="status-text">Blocking</span>
+                        </div>
+                    </div>
+
+                    <div class="hours-grid">
+                        <div class="hours-item">
+                            <div class="hours-label">Total</div>
+                            <div class="hours-value">--</div>
+                        </div>
+                        <div class="hours-item">
+                            <div class="hours-label">Reg.</div>
+                            <div class="hours-value">--</div>
+                        </div>
+                        <div class="hours-item">
+                            <div class="hours-label">OT</div>
+                            <div class="hours-value">--</div>
+                        </div>
+                        <div class="hours-item">
+                            <div class="hours-label">DT</div>
+                            <div class="hours-value">--</div>
+                        </div>
+                        <div class="hours-item">
+                            <div class="hours-label">Time off</div>
+                            <div class="hours-value">--</div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <button class="review-button">Review</button>
+                        <div class="menu-container">
+                            <button class="menu-trigger" onclick="toggleMenu(this)">⋮</button>
+                            <div class="menu-dropdown">
+                                <div class="menu-item">
+                                    <span class="menu-icon">⚡</span>
+                                    <span>Push timesheet to QuickBooks</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Employee 4: Successfully synced -->
+                <div class="employee-card">
+                    <div class="employee-header">
+                        <div class="employee-avatar">👤</div>
+                        <div class="employee-info">
+                            <div class="employee-name">Marinela Topi</div>
+                            <div class="employee-role">Employee</div>
+                        </div>
+                        <div class="checkbox" onclick="toggleCheckbox(this)"></div>
+                    </div>
+
+                    <div class="qb-sync-status success">
+                        <span class="status-icon success">✓</span>
+                        <span>Synced to QuickBooks - <span class="qb-link">View timesheet</span></span>
+                    </div>
+
+                    <div class="hours-grid">
+                        <div class="hours-item">
+                            <div class="hours-label">Total</div>
+                            <div class="hours-value">42</div>
+                        </div>
+                        <div class="hours-item">
+                            <div class="hours-label">Reg.</div>
+                            <div class="hours-value">40</div>
+                        </div>
+                        <div class="hours-item">
+                            <div class="hours-label">OT</div>
+                            <div class="hours-value">2</div>
+                        </div>
+                        <div class="hours-item">
+                            <div class="hours-label">DT</div>
+                            <div class="hours-value">--</div>
+                        </div>
+                        <div class="hours-item">
+                            <div class="hours-label">Time off</div>
+                            <div class="hours-value">--</div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <button class="review-button">Review</button>
+                        <div class="menu-container">
+                            <button class="menu-trigger" onclick="toggleMenu(this)">⋮</button>
+                            <div class="menu-dropdown">
+                                <div class="menu-item">
+                                    <span class="cloud-upload-icon"></span>
+                                    <span>Push timesheet to QuickBooks</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sync History View -->
+        <div id="sync-history-view" class="sync-history-container">
+            <div class="history-controls">
+                <div class="history-range-selector">
+                    <span class="history-range-label">Show history for:</span>
+                    <select class="history-range-select" onchange="changeHistoryRange(this.value)">
+                        <option value="3" selected>Last 3 months</option>
+                        <option value="6">Last 6 months</option>
+                        <option value="12">Last 12 months</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Pay Period</th>
+                            <th>Sync Date</th>
+                            <th>Total Hours</th>
+                            <th>Status</th>
+                            <th>View in QB</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Elizabeth Smith</td>
+                            <td>02/07/2026 - 02/13/2026</td>
+                            <td>02/14/2026 2:05 AM</td>
+                            <td>40</td>
+                            <td><span class="status-badge synced">Synced</span></td>
+                            <td><a href="#" class="table-link">View</a></td>
+                            <td>
+                                <div class="table-menu">
+                                    <button class="menu-trigger" onclick="toggleMenu(this)">⋮</button>
+                                    <div class="menu-dropdown">
+                                        <div class="menu-item">
+                                            <span class="cloud-upload-icon"></span>
+                                            <span>Push timesheet to QuickBooks</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Marinela Topi</td>
+                            <td>02/07/2026 - 02/13/2026</td>
+                            <td>02/14/2026 2:05 AM</td>
+                            <td>42</td>
+                            <td><span class="status-badge synced">Synced</span></td>
+                            <td><a href="#" class="table-link">View</a></td>
+                            <td>
+                                <div class="table-menu">
+                                    <button class="menu-trigger" onclick="toggleMenu(this)">⋮</button>
+                                    <div class="menu-dropdown">
+                                        <div class="menu-item">
+                                            <span class="cloud-upload-icon"></span>
+                                            <span>Push timesheet to QuickBooks</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Emma Smith</td>
+                            <td>02/07/2026 - 02/13/2026</td>
+                            <td>02/14/2026 2:05 AM</td>
+                            <td>38</td>
+                            <td><span class="status-badge failed">Failed</span></td>
+                            <td>--</td>
+                            <td>
+                                <div class="table-menu">
+                                    <button class="menu-trigger" onclick="toggleMenu(this)">⋮</button>
+                                    <div class="menu-dropdown">
+                                        <div class="menu-item">Retry sync</div>
+                                        <div class="menu-item">Fix issue</div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Elizabeth Smith</td>
+                            <td>01/31/2026 - 02/06/2026</td>
+                            <td>02/07/2026 2:04 AM</td>
+                            <td>40</td>
+                            <td><span class="status-badge synced">Synced</span></td>
+                            <td><a href="#" class="table-link">View</a></td>
+                            <td>
+                                <div class="table-menu">
+                                    <button class="menu-trigger" onclick="toggleMenu(this)">⋮</button>
+                                    <div class="menu-dropdown">
+                                        <div class="menu-item">
+                                            <span class="cloud-upload-icon"></span>
+                                            <span>Push timesheet to QuickBooks</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Marinela Topi</td>
+                            <td>01/31/2026 - 02/06/2026</td>
+                            <td>02/07/2026 2:04 AM</td>
+                            <td>40</td>
+                            <td><span class="status-badge synced">Synced</span></td>
+                            <td><a href="#" class="table-link">View</a></td>
+                            <td>
+                                <div class="table-menu">
+                                    <button class="menu-trigger" onclick="toggleMenu(this)">⋮</button>
+                                    <div class="menu-dropdown">
+                                        <div class="menu-item">
+                                            <span class="cloud-upload-icon"></span>
+                                            <span>Push timesheet to QuickBooks</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Emma Smith</td>
+                            <td>01/31/2026 - 02/06/2026</td>
+                            <td>02/07/2026 2:04 AM</td>
+                            <td>38</td>
+                            <td><span class="status-badge failed">Failed</span></td>
+                            <td>--</td>
+                            <td>
+                                <div class="table-menu">
+                                    <button class="menu-trigger" onclick="toggleMenu(this)">⋮</button>
+                                    <div class="menu-dropdown">
+                                        <div class="menu-item">Retry sync</div>
+                                        <div class="menu-item">Fix issue</div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="pagination" style="display: none;">
+                <button class="page-button" disabled>← Previous</button>
+                <button class="page-button active">1</button>
+                <button class="page-button">2</button>
+                <button class="page-button">3</button>
+                <button class="page-button">Next →</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleMenu(button) {
+            const dropdown = button.nextElementSibling;
+            document.querySelectorAll('.menu-dropdown').forEach(menu => {
+                if (menu !== dropdown) {
+                    menu.classList.remove('active');
+                }
+            });
+            dropdown.classList.toggle('active');
+        }
+
+        // Close menus when clicking outside
+        document.addEventListener('click', function(event) {
+            // Close regular menus
+            if (!event.target.closest('.menu-container') && !event.target.closest('.table-menu')) {
+                document.querySelectorAll('.menu-dropdown').forEach(menu => {
+                    menu.classList.remove('active');
+                });
+            }
+            // Close bulk action dropdown
+            if (!event.target.closest('.bulk-action-container')) {
+                const bulkDropdown = document.getElementById('bulk-dropdown');
+                if (bulkDropdown) {
+                    bulkDropdown.classList.remove('active');
+                }
+            }
+        });
+
+        function toggleCheckbox(checkbox) {
+            checkbox.classList.toggle('checked');
+            updateBulkActionButton();
+        }
+
+        function updateBulkActionButton() {
+            const checkedBoxes = document.querySelectorAll('.checkbox.checked');
+            const bulkContainer = document.getElementById('bulk-action-container');
+            if (checkedBoxes.length > 1) {
+                bulkContainer.classList.add('visible');
+            } else {
+                bulkContainer.classList.remove('visible');
+            }
+        }
+
+        function showBulkMenu() {
+            const count = document.querySelectorAll('.checkbox.checked').length;
+            alert('Push ' + count + ' timesheets to QuickBooks');
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.employee-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (tab === 'sync-history') {
+                document.getElementById('employees-view').style.display = 'none';
+                document.getElementById('sync-history-view').classList.add('active');
+            } else {
+                document.getElementById('employees-view').style.display = 'block';
+                document.getElementById('sync-history-view').classList.remove('active');
+            }
+        }
+
+        function changeHistoryRange(months) {
+            const pagination = document.getElementById('pagination');
+            if (months === '3') {
+                pagination.style.display = 'none';
+            } else {
+                pagination.style.display = 'flex';
+            }
+        }
+    </script>
+</body>
+</html>

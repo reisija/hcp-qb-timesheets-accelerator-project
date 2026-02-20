@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payroll Onboarding - QuickBooks Sync | HCP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: #fafafa;
+            color: #212121;
+        }
+
+        .header {
+            background: #2c3e50;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .header-logo {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .payroll-container {
+            display: flex;
+            min-height: calc(100vh - 48px);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            max-width: 900px;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: white;
+            padding: 24px;
+            border-left: 1px solid #e0e0e0;
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #212121;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            font-size: 12px;
+            font-weight: 400;
+            color: #616161;
+            line-height: 20px;
+        }
+
+        .onboarding-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .step-item {
+            display: flex;
+            gap: 16px;
+            position: relative;
+            margin-bottom: 8px;
+        }
+
+        .step-item::before {
+            content: "";
+            position: absolute;
+            left: 17.5px;
+            top: 40px;
+            bottom: -8px;
+            width: 2px;
+            background: #e0e0e0;
+        }
+
+        .step-item:last-child::before {
+            display: none;
+        }
+
+        .step-number {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #616161;
+            flex-shrink: 0;
+            z-index: 1;
+        }
+
+        .step-number.complete {
+            background: #00a344;
+            border-color: #00a344;
+            color: white;
+            font-size: 16px;
+        }
+
+        .step-number.active {
+            background: #0e6fbe;
+            border-color: #0e6fbe;
+            color: white;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .step-card.collapsed {
+            padding: 12px 16px;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .step-header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .step-icon {
+            font-size: 16px;
+        }
+
+        .step-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #212121;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .badge-autofilled {
+            background: #d4edff;
+            color: #0e6fbe;
+        }
+
+        .expand-icon {
+            color: #616161;
+            font-size: 12px;
+        }
+
+        .status-complete {
+            color: #00a344;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .step-items {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .step-task {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #212121;
+        }
+
+        .task-checkbox {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .task-checkbox.complete {
+            border-color: #00a344;
+            background: #00a344;
+            position: relative;
+        }
+
+        .task-checkbox.complete::after {
+            content: "✓";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .step-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .time-estimate {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #616161;
+        }
+
+        .review-button {
+            background: #0e6fbe;
+            color: white;
+            border: none;
+            border-radius: 200px;
+            padding: 8px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .review-button:hover {
+            background: #0d47a1;
+        }
+
+        /* Sidebar */
+        .payday-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .payday-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .goal-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00a344;
+        }
+
+        .payday-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #212121;
+        }
+
+        .payday-days {
+            font-size: 32px;
+            font-weight: 600;
+            color: #212121;
+            margin-bottom: 4px;
+        }
+
+        .payday-link {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0e6fbe;
+            cursor: pointer;
+        }
+
+        .calendar {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 8px;
+            width: 560px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 0 12px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            padding: 24px 24px 16px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #212121;
+            margin-bottom: 8px;
+        }
+
+        .modal-subtitle {
+            font-size: 14px;
+            color: #616161;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .form-section {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #212121;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .radio-option {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .radio-option:hover {
+            border-color: #0e6fbe;
+        }
+
+        .radio-option.selected {
+            border-color: #0e6fbe;
+            background: rgba(14, 111, 190, 0.05);
+        }
+
+        .radio-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .radio-button {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 50%;
+            position: relative;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .radio-option.selected .radio-button {
+            border-color: #0e6fbe;
+        }
+
+        .radio-option.selected .radio-button::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            background: #0e6fbe;
+            border-radius: 50%;
+        }
+
+        .radio-content {
+            flex: 1;
+        }
+
+        .radio-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #212121;
+            margin-bottom: 4px;
+        }
+
+        .radio-description {
+            font-size: 14px;
+            color: #616161;
+        }
+
+        .nested-options {
+            margin-top: 12px;
+            display: none;
+        }
+
+        .radio-option.selected .nested-options {
+            display: block;
+        }
+
+        .select-input {
+            width: 100%;
+            height: 40px;
+            padding: 10px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #212121;
+            background: white;
+        }
+
+        .info-box {
+            background: #e8f4fd;
+            border-left: 3px solid #0e6fbe;
+            border-radius: 4px;
+            padding: 12px;
+            margin-top: 16px;
+        }
+
+        .info-box-text {
+            font-size: 14px;
+            color: #212121;
+            line-height: 1.5;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .button-secondary {
+            background: white;
+            color: #616161;
+            border: 1px solid #e0e0e0;
+            border-radius: 200px;
+            padding: 8px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .button-primary {
+            background: #0e6fbe;
+            color: white;
+            border: none;
+            border-radius: 200px;
+            padding: 8px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .button-primary:hover {
+            background: #0d47a1;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-logo">🏠 Housecall Pro</div>
+    </div>
+
+    <div class="payroll-container">
+        <div class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Payroll onboarding</h1>
+                <p class="page-subtitle">If you don't have all the information handy, feel free to leave the setup and come back when you're ready</p>
+            </div>
+
+            <div class="onboarding-steps">
+                <!-- Step 1: Pre-setup Survey -->
+                <div class="step-item">
+                    <div class="step-number complete">✓</div>
+                    <div class="step-content">
+                        <div class="step-card collapsed">
+                            <div class="step-header">
+                                <div class="step-header-left">
+                                    <span class="step-icon">⚙️</span>
+                                    <span class="step-title">Pre-setup Survey</span>
+                                </div>
+                                <div class="status-complete">Complete ▼</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Company details -->
+                <div class="step-item">
+                    <div class="step-number active">2</div>
+                    <div class="step-content">
+                        <div class="step-card">
+                            <div class="step-header">
+                                <div class="step-header-left">
+                                    <span class="step-icon">🏢</span>
+                                    <span class="step-title">Company details</span>
+                                </div>
+                                <span class="expand-icon">▼</span>
+                            </div>
+                            <div class="step-items">
+                                <div class="step-task">
+                                    <div class="task-checkbox"></div>
+                                    <span>Add business information</span>
+                                </div>
+                                <div class="step-task">
+                                    <div class="task-checkbox complete"></div>
+                                    <span>Signatory <span class="badge badge-autofilled">Autofilled</span></span>
+                                </div>
+                                <div class="step-task">
+                                    <div class="task-checkbox complete"></div>
+                                    <span>Registered business address <span class="badge badge-autofilled">Autofilled</span></span>
+                                </div>
+                                <div class="step-task">
+                                    <div class="task-checkbox"></div>
+                                    <span>Add primary workplace address</span>
+                                </div>
+                            </div>
+                            <div class="step-footer">
+                                <div class="time-estimate">
+                                    <span>⏱️</span>
+                                    <span>1 minute</span>
+                                </div>
+                                <button class="review-button">Review</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: QuickBooks Timesheet Sync -->
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <div class="step-card">
+                            <div class="step-header">
+                                <div class="step-header-left">
+                                    <span class="step-icon">🔄</span>
+                                    <span class="step-title">QuickBooks timesheet sync</span>
+                                </div>
+                                <span class="expand-icon">▼</span>
+                            </div>
+                            <div class="step-items">
+                                <div class="step-task">
+                                    <div class="task-checkbox"></div>
+                                    <span>Configure sync schedule</span>
+                                </div>
+                                <div class="step-task">
+                                    <div class="task-checkbox"></div>
+                                    <span>Choose automation settings</span>
+                                </div>
+                            </div>
+                            <div class="step-footer">
+                                <div class="time-estimate">
+                                    <span>⏱️</span>
+                                    <span>2 minutes</span>
+                                </div>
+                                <button class="review-button" onclick="openModal()">Review</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Terms & conditions -->
+                <div class="step-item">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <div class="step-card collapsed">
+                            <div class="step-header">
+                                <div class="step-header-left">
+                                    <span class="step-icon">📄</span>
+                                    <span class="step-title">Terms & conditions</span>
+                                </div>
+                                <span class="expand-icon">▼</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="payday-card">
+                <div class="payday-header">
+                    <div class="goal-indicator"></div>
+                    <div class="payday-title">First payday goal</div>
+                </div>
+                <div class="payday-days">7 days</div>
+                <div class="payday-link">Edit payday goal</div>
+            </div>
+
+            <div class="calendar">
+                <!-- Calendar would go here -->
+                <div style="text-align: center; padding: 20px; color: #616161; font-size: 14px;">
+                    📅 February 2026
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuration Modal -->
+    <div class="modal-overlay" id="configModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Configure QuickBooks Timesheet Sync</h2>
+                <p class="modal-subtitle">Choose how often employee hours should sync to QuickBooks Online</p>
+            </div>
+            <div class="modal-body">
+                <div class="form-section">
+                    <label class="form-label">Sync Type</label>
+                    <div class="radio-group">
+                        <div class="radio-option selected" onclick="selectRadio(this)">
+                            <div class="radio-header">
+                                <div class="radio-button"></div>
+                                <div class="radio-content">
+                                    <div class="radio-title">Automatic sync</div>
+                                    <div class="radio-description">Timesheets sync on a regular schedule without manual intervention</div>
+                                    <div class="nested-options">
+                                        <label class="form-label" style="margin-top: 12px;">Sync Frequency</label>
+                                        <select class="select-input">
+                                            <option selected>Daily at 2:00 AM</option>
+                                            <option>Daily at 12:00 PM</option>
+                                            <option>Daily at 6:00 PM</option>
+                                            <option>Weekly on Monday at 2:00 AM</option>
+                                            <option>Weekly on Friday at 6:00 PM</option>
+                                            <option>Monthly on 1st at 2:00 AM</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="radio-option" onclick="selectRadio(this)">
+                            <div class="radio-header">
+                                <div class="radio-button"></div>
+                                <div class="radio-content">
+                                    <div class="radio-title">Manual sync only</div>
+                                    <div class="radio-description">You'll need to manually push timesheets to QuickBooks when ready</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-box-text">
+                        <strong>What syncs:</strong><br>
+                        • Total hours per employee per day<br>
+                        • Data appears in QuickBooks Online Time Tracking<br>
+                        • Employee names must match between HCP and QuickBooks
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="button-secondary" onclick="closeModal()">Cancel</button>
+                <button class="button-primary" onclick="saveConfig()">Enable Sync</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('configModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('configModal').classList.remove('active');
+        }
+
+        function saveConfig() {
+            alert('Sync configured successfully!');
+            closeModal();
+        }
+
+        function selectRadio(element) {
+            const radioGroup = element.closest('.radio-group');
+            radioGroup.querySelectorAll('.radio-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            element.classList.add('selected');
+        }
+    </script>
+</body>
+</html>
